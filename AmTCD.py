@@ -14,8 +14,8 @@ class Application:
         self.menubar = Menu(self.window)
         
         self.fileMenu = Menu(self.menubar, tearoff=False)
-        self.fileMenu.add_command(label="Новый")
-        self.fileMenu.add_command(label="Открыть")
+        self.fileMenu.add_command(label="Новый", command=self.onNewFileButtonClick)
+        self.fileMenu.add_command(label="Открыть", command=self.onOpenFileButtonClick)
         self.fileMenu.add_command(label="Сохранить", command=self.onSaveFileButtonClick)
         self.fileMenu.add_command(label="Сохранить как", command=self.onSaveFileAsButtonClick)
         self.fileMenu.add_separator()
@@ -42,6 +42,14 @@ class Application:
         
         self.editText = Text(wrap=WORD)
         self.editText.grid(row=0, column=0)
+
+    def onNewFileButtonClick(self) -> None:
+        self.currentFileDirectory=""
+        self.window.title("NoName.txtx")
+        self.editText.delete("1.0", END)
+
+    def onOpenFileButtonClick(self) -> None:
+        pass
 
     def isDirectoryEmpty(self, directory: str) -> bool:
         return len(directory.replace(' ', '')) == 0
