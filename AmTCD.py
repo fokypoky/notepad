@@ -2,10 +2,12 @@ from tkinter import *
 from tkinter.messagebox import showinfo, showerror, showwarning
 from tkinter import ttk
 from tkinter import filedialog
+from tkinter.simpledialog import askinteger 
 
 class Application:
     def __init__(self) -> None:
         self.currentFileDirectory = ""
+        self.personalKey = int(-1)
 
         self.window = Tk()
         self.window.minsize(800, 450)
@@ -24,10 +26,10 @@ class Application:
         self.menubar.add_cascade(label="Файл", menu=self.fileMenu)
 
         self.editingMenu = Menu(self.menubar, tearoff=False)
-        self.editingMenu.add_command(label="Копировать")
-        self.editingMenu.add_command(label="Вставить")
+        self.editingMenu.add_command(label="Копировать", command = self.onCopyTextButtonClick)
+        self.editingMenu.add_command(label="Вставить", command=self.onInsertTextButtonClick)
         self.editingMenu.add_separator()
-        self.editingMenu.add_command(label="Параметры...")
+        self.editingMenu.add_command(label="Параметры...", command=self.onParametersButtonClick)
 
         self.menubar.add_cascade(label="Правка", menu=self.editingMenu)
         
@@ -82,12 +84,25 @@ class Application:
                 showinfo(title="Сохранение", message="Файл сохранен успешно")
         else:
             self.onSaveFileAsButtonClick()
+    
+    def onCopyTextButtonClick(self):
+        self.window.clipboard_clear()
+        self.window.clipboard_append(self.editText.selection_get())
+
+    def onInsertTextButtonClick(self):
+        clipboardValue = self.window.clipboard_get()
+        if isinstance(clipboardValue, str):
+            self.editText.insert(INSERT, clipboardValue)
+        else:
+            showerror(title="Ошибка", message="Вставить можно только текст")
 
     def onAboutButtonClick(self):
         showinfo(title="О программе", message="Программа для 'прозрачного шифрования'\n(c) Petukhov A.O., Russia, 2023")
+    
     def onShowApplicationContentClick(self):
         contentWindow = Toplevel()
-        contentWindow.minsize(400, 250)
+        contentWindow.resizable(False, False)
+        contentWindow.minsize(350, 250)
         contentWindow.title("Справка")
 
         info = "Приложение с графическим интерфейсом\n'Блокнот TCD'(файл приложения: TCD).\n"
@@ -97,6 +112,9 @@ class Application:
         
         closeButton = ttk.Button(contentWindow,text="Закрыть", command= contentWindow.destroy)
         closeButton.pack(anchor=SE)
+    def onParametersButtonClick(self) -> None:
+        self.personalKey = askinteger(title="Ключ", prompt="Введите Ваш ключ:")
+
     def showWindow(self) -> None:
         self.window.mainloop()
 
