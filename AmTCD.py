@@ -1,21 +1,25 @@
 from tkinter import *
 from tkinter.messagebox import showinfo, showerror, showwarning
 from tkinter import ttk
+from tkinter import filedialog
 
 class Application:
     def __init__(self) -> None:
+        self.currentFileDirectory = ""
+
         self.window = Tk()
         self.window.minsize(800, 450)
         self.window.title("NoName.txtx")
+        self.window.resizable(False, False)
         self.menubar = Menu(self.window)
         
         self.fileMenu = Menu(self.menubar, tearoff=False)
         self.fileMenu.add_command(label="Новый")
         self.fileMenu.add_command(label="Открыть")
-        self.fileMenu.add_command(label="Сохранить")
-        self.fileMenu.add_command(label="Сохранить как")
+        self.fileMenu.add_command(label="Сохранить", command=self.onSaveFileButtonClick)
+        self.fileMenu.add_command(label="Сохранить как", command=self.onSaveFileAsButtonClick)
         self.fileMenu.add_separator()
-        self.fileMenu.add_command(label="Выход")
+        self.fileMenu.add_command(label="Выход", command=self.window.destroy)
 
         self.menubar.add_cascade(label="Файл", menu=self.fileMenu)
 
@@ -35,12 +39,34 @@ class Application:
         self.menubar.add_cascade(label="Справка", menu=self.infoMenu)
 
         self.window.config(menu=self.menubar) 
+        
+        self.editText = Text(wrap=WORD)
+        self.editText.grid(row=0, column=0)
+
+    def isDirectoryEmpty(self, directory: str) -> bool:
+        return len(directory.replace(' ', '')) == 0
+
+    def onSaveFileAsButtonClick(self):
+        directory = filedialog.asksaveasfilename(defaultextension="txtx")
+        if(not self.isDirectoryEmpty(directory= directory)):
+            with open(directory, "w") as file:
+                file.write(self.editText.get(1.0, END))
+            self.currentFileDirectory = directory
+            self.window.title(self.currentFileDirectory)
+            showinfo(title="Сохранение", message="Файл сохранен успешно")
+        else:
+            showerror(title="Ошибка записи", message= "Не получилось создать/перезаписать файл")
     
-    
+    def onSaveFileButtonClick(self):
+        if(not self.isDirectoryEmpty(self.currentFileDirectory)):
+            with open(self.currentFileDirectory, "w") as file:
+                file.write(self.editText.get(1.0, END))
+                showinfo(title="Сохранение", message="Файл сохранен успешно")
+        else:
+            self.onSaveFileAsButtonClick()
+
     def onAboutButtonClick(self):
         showinfo(title="О программе", message="Программа для 'прозрачного шифрования'\n(c) Petukhov A.O., Russia, 2023")
-    
-    
     def onShowApplicationContentClick(self):
         contentWindow = Toplevel()
         contentWindow.minsize(400, 250)
@@ -51,9 +77,8 @@ class Application:
         infoLabel = ttk.Label(contentWindow, text= info)
         infoLabel.pack(anchor=CENTER, expand=1)
         
-        closeButton = ttk.Button(contentWindow,text="close", command= contentWindow.destroy)
+        closeButton = ttk.Button(contentWindow,text="Закрыть", command= contentWindow.destroy)
         closeButton.pack(anchor=SE)
-
     def showWindow(self) -> None:
         self.window.mainloop()
 
