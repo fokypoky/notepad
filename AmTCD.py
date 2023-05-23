@@ -49,7 +49,17 @@ class Application:
         self.editText.delete("1.0", END)
 
     def onOpenFileButtonClick(self) -> None:
-        pass
+        directory = filedialog.askopenfilename(defaultextension="txtx")
+        if (not self.isDirectoryEmpty(directory)):
+            with open(directory, "r") as file:
+                text = file.read()
+                # здесь будет расшифровка
+                self.editText.delete("1.0", END)
+                self.editText.insert("1.0", END)
+            self.window.title(directory)
+            self.currentFileDirectory = directory
+        else:
+            showerror(title="Ошибка", message="Ошибка чтения файла")
 
     def isDirectoryEmpty(self, directory: str) -> bool:
         return len(directory.replace(' ', '')) == 0
