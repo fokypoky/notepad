@@ -4,6 +4,23 @@ from tkinter import ttk
 from tkinter import filedialog
 from tkinter.simpledialog import askinteger 
 
+class Encryptor:
+    def encrypt(self, message: str, key:int) -> str:
+        encrypted = ""
+        if(key > 32):
+            key = key % 32
+        for c in message:
+            unicode_number = ord(c)
+            encrypted += chr(unicode_number + key)
+        return encrypted
+    def decrypt(self, message: str, key: int) -> str:
+        decrypted = ""
+        if(key > 32):
+            key = key % 32
+        for c in message:
+            unicode_number = ord(c)
+            decrypted += chr(unicode_number - key)
+        return decrypted
 class Application:
     def __init__(self) -> None:
         self.currentFileDirectory = ""
