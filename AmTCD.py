@@ -4,6 +4,7 @@ from tkinter import ttk
 from tkinter import filedialog
 from tkinter.simpledialog import askinteger
 import configparser
+import os.path
 
 class Encryptor:
     def encrypt(self, message: str, key:int) -> str:
@@ -26,6 +27,14 @@ class Application:
     def __init__(self) -> None:
         self.currentFileDirectory = ""
         self.personalKey = None
+
+        if(os.path.exists("AmTCD.ini")):
+            config = configparser.ConfigParser()
+            config.read('AmTCD.ini')
+            self.personalKey = int(config['main']['key'])
+
+        print(self.personalKey)
+        print(type(self.personalKey))
 
         self.window = Tk()
         self.window.minsize(800, 450)
@@ -111,7 +120,6 @@ class Application:
             showerror(title="Ошибка", message="Неверно указан путь")
     
     def onSaveFileButtonClick(self) -> None:
-        print(self.isDirectoryEmpty(self.currentFileDirectory))
         if(not self.isDirectoryEmpty(self.currentFileDirectory)):
             self.saveFile()
         else:
@@ -119,7 +127,7 @@ class Application:
 
     def saveFile(self) -> None:
         if(self.personalKey is None):
-            self.personalKey = askinteger(title="Ключ", prompt="Ваш ключ не установлен. Введите его")
+            self.personalKey = askinteger(title="Ключ", prompt="Ваш ключ не установлен. Введите его", minvalue=1)
         with open(self.currentFileDirectory, "w") as file:
             encryptor = Encryptor()
             encrypted_text = encryptor.encrypt(message=self.editText.get(1.0, END), key= self.personalKey)
@@ -156,9 +164,13 @@ class Application:
     def onParametersButtonClick(self) -> None:
         self.personalKey = askinteger(title="Ключ", prompt="Введите Ваш ключ:", minvalue=1)
         self.savePreferences(self.personalKey)
+        showinfo(title='Ключ', message='Ключ сохранен')
 
-    def savePreferences(self, key) -> None:
-        pass
+    def savePreferences(self, key: int) -> None:
+        config = configparser.ConfigParser()
+        config['main'] = {'key' : str(key)}
+        with open("AmTCD.ini", 'w') as file:
+            config.write(file)
 
     def showWindow(self) -> None:
         self.window.mainloop()
