@@ -43,7 +43,8 @@ class Application:
         self.window.config(menu=self.menubar) 
         
         self.editText = Text(wrap=WORD)
-        self.editText.grid(row=0, column=0)
+        #self.editText.grid(row=0, column=0)
+        self.editText.pack(fill="both", expand=True)
 
     def onNewFileButtonClick(self) -> None:
         self.currentFileDirectory=""
