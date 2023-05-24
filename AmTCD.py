@@ -24,7 +24,7 @@ class Encryptor:
 class Application:
     def __init__(self) -> None:
         self.currentFileDirectory = ""
-        self.personalKey = int(-1)
+        self.personalKey = None
 
         self.window = Tk()
         self.window.minsize(800, 450)
@@ -60,8 +60,12 @@ class Application:
         self.window.config(menu=self.menubar) 
         
         self.editText = Text(wrap=WORD)
-        #self.editText.grid(row=0, column=0)
+
+        self.scroll = Scrollbar(command=self.editText.yview())
+        self.scroll.pack(side=RIGHT, fill=Y)
+
         self.editText.pack(fill="both", expand=True)
+        self.editText.configure(yscrollcommand=self.scroll.set)
 
     def onNewFileButtonClick(self) -> None:
         self.currentFileDirectory=""
@@ -139,7 +143,7 @@ class Application:
         closeButton = ttk.Button(contentWindow,text="Закрыть", command= contentWindow.destroy)
         closeButton.pack(anchor=SE)
     def onParametersButtonClick(self) -> None:
-        self.personalKey = askinteger(title="Ключ", prompt="Введите Ваш ключ:")
+        self.personalKey = askinteger(title="Ключ", prompt="Введите Ваш ключ:", minvalue=1)
 
     def showWindow(self) -> None:
         self.window.mainloop()
