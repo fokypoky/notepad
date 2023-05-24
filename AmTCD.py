@@ -1,8 +1,9 @@
 from tkinter import *
-from tkinter.messagebox import showinfo, showerror, showwarning
+from tkinter.messagebox import showinfo, showerror
 from tkinter import ttk
 from tkinter import filedialog
-from tkinter.simpledialog import askinteger 
+from tkinter.simpledialog import askinteger
+import configparser
 
 class Encryptor:
     def encrypt(self, message: str, key:int) -> str:
@@ -75,9 +76,15 @@ class Application:
     def onOpenFileButtonClick(self) -> None:
         directory = filedialog.askopenfilename(defaultextension="txtx")
         if(not self.isDirectoryEmpty(directory)):
+            encryptor = Encryptor()
+
+            key = askinteger(title="Ключ", prompt="Введите ключ для расшифровки")
             text = self.readFile(directory)
+
+            encrypted_text = encryptor.encrypt(message=text, key= key)
+
             self.editText.delete("1.0", END)
-            self.editText.insert("1.0", END)
+            self.editText.insert("1.0", encrypted_text)
             self.window.title(directory)
             self.currentFileDirectory = directory
         else:
@@ -144,6 +151,10 @@ class Application:
         closeButton.pack(anchor=SE)
     def onParametersButtonClick(self) -> None:
         self.personalKey = askinteger(title="Ключ", prompt="Введите Ваш ключ:", minvalue=1)
+        self.savePreferences(self.personalKey)
+
+    def savePreferences(self, key) -> None:
+        pass
 
     def showWindow(self) -> None:
         self.window.mainloop()
