@@ -52,39 +52,47 @@ class Application:
 
     def onOpenFileButtonClick(self) -> None:
         directory = filedialog.askopenfilename(defaultextension="txtx")
-        if (not self.isDirectoryEmpty(directory)):
-            with open(directory, "r") as file:
-                text = file.read()
-                # здесь будет расшифровка
-                self.editText.delete("1.0", END)
-                self.editText.insert("1.0", END)
+        if(not self.isDirectoryEmpty(directory)):
+            text = self.readFile(directory)
+            self.editText.delete("1.0", END)
+            self.editText.insert("1.0", END)
             self.window.title(directory)
             self.currentFileDirectory = directory
         else:
-            showerror(title="Ошибка", message="Ошибка чтения файла")
+            showerror(title="Ошибка", message="Неверно указан путь")
+
+
+    def readFile(self, directory: str) -> str:
+        text = ""
+        with open(directory, "r") as file:
+            text = file.read()
+        return text
+
 
     def isDirectoryEmpty(self, directory: str) -> bool:
         return len(directory.replace(' ', '')) == 0
 
     def onSaveFileAsButtonClick(self):
-        directory = filedialog.asksaveasfilename(defaultextension="txtx")
-        if(not self.isDirectoryEmpty(directory= directory)):
-            with open(directory, "w") as file:
-                file.write(self.editText.get(1.0, END))
-            self.currentFileDirectory = directory
+        self.currentFileDirectory = filedialog.asksaveasfilename(defaultextension="txtx")
+        if(not self.isDirectoryEmpty(self.currentFileDirectory)):
+            self.saveFile()
             self.window.title(self.currentFileDirectory)
-            showinfo(title="Сохранение", message="Файл сохранен успешно")
+            showinfo(title="Сохранение", message="Файл успешно сохранен")
         else:
-            showerror(title="Ошибка записи", message= "Не получилось создать/перезаписать файл")
+            showerror(title="Ошибка", message="Неверно указан путь")
     
     def onSaveFileButtonClick(self):
+        print(self.isDirectoryEmpty(self.currentFileDirectory))
         if(not self.isDirectoryEmpty(self.currentFileDirectory)):
-            with open(self.currentFileDirectory, "w") as file:
-                file.write(self.editText.get(1.0, END))
-                showinfo(title="Сохранение", message="Файл сохранен успешно")
+            self.saveFile()
         else:
             self.onSaveFileAsButtonClick()
-    
+
+    def saveFile(self) -> None:
+        with open(self.currentFileDirectory, "w") as file:
+            file.write(self.editText.get(1.0, END))
+        
+
     def onCopyTextButtonClick(self):
         self.window.clipboard_clear()
         self.window.clipboard_append(self.editText.selection_get())
