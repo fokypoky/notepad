@@ -13,6 +13,11 @@ class Encryptor:
             key = key % 32
         for c in message:
             unicode_number = ord(c)
+            if (unicode_number + key > 1114111):
+                rest = unicode_number + key - 1114111
+                unicode_number = 0 + rest
+                encrypted += chr(unicode_number)
+                continue
             encrypted += chr(unicode_number + key)
         return encrypted
     def decrypt(self, message: str, key: int) -> str:
@@ -21,6 +26,11 @@ class Encryptor:
             key = key % 32
         for c in message:
             unicode_number = ord(c)
+            if (unicode_number - key < 0):
+                rest = key - unicode_number
+                unicode_number = 1114111 - rest
+                decrypted += chr(unicode_number)
+                continue
             decrypted += chr(unicode_number - key)
         return decrypted
 class Application:
