@@ -73,7 +73,7 @@ class Application:
     def isDirectoryEmpty(self, directory: str) -> bool:
         return len(directory.replace(' ', '')) == 0
 
-    def onSaveFileAsButtonClick(self):
+    def onSaveFileAsButtonClick(self) -> None:
         self.currentFileDirectory = filedialog.asksaveasfilename(defaultextension="txtx")
         if(not self.isDirectoryEmpty(self.currentFileDirectory)):
             self.saveFile()
@@ -82,7 +82,7 @@ class Application:
         else:
             showerror(title="Ошибка", message="Неверно указан путь")
     
-    def onSaveFileButtonClick(self):
+    def onSaveFileButtonClick(self) -> None:
         print(self.isDirectoryEmpty(self.currentFileDirectory))
         if(not self.isDirectoryEmpty(self.currentFileDirectory)):
             self.saveFile()
@@ -94,21 +94,21 @@ class Application:
             file.write(self.editText.get(1.0, END))
         
 
-    def onCopyTextButtonClick(self):
+    def onCopyTextButtonClick(self) -> None:
         self.window.clipboard_clear()
         self.window.clipboard_append(self.editText.selection_get())
 
-    def onInsertTextButtonClick(self):
+    def onInsertTextButtonClick(self) -> None:
         clipboardValue = self.window.clipboard_get()
         if isinstance(clipboardValue, str):
             self.editText.insert(INSERT, clipboardValue)
         else:
             showerror(title="Ошибка", message="Вставить можно только текст")
 
-    def onAboutButtonClick(self):
+    def onAboutButtonClick(self) -> None:
         showinfo(title="О программе", message="Программа для 'прозрачного шифрования'\n(c) Petukhov A.O., Russia, 2023")
     
-    def onShowApplicationContentClick(self):
+    def onShowApplicationContentClick(self) -> None:
         contentWindow = Toplevel()
         contentWindow.resizable(False, False)
         contentWindow.minsize(350, 250)
