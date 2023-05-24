@@ -81,10 +81,10 @@ class Application:
             key = askinteger(title="Ключ", prompt="Введите ключ для расшифровки")
             text = self.readFile(directory)
 
-            encrypted_text = encryptor.encrypt(message=text, key= key)
+            decrypted_text = encryptor.decrypt(message=text, key= key)
 
             self.editText.delete("1.0", END)
-            self.editText.insert("1.0", encrypted_text)
+            self.editText.insert("1.0", decrypted_text)
             self.window.title(directory)
             self.currentFileDirectory = directory
         else:
@@ -118,8 +118,12 @@ class Application:
             self.onSaveFileAsButtonClick()
 
     def saveFile(self) -> None:
+        if(self.personalKey is None):
+            self.personalKey = askinteger(title="Ключ", prompt="Ваш ключ не установлен. Введите его")
         with open(self.currentFileDirectory, "w") as file:
-            file.write(self.editText.get(1.0, END))
+            encryptor = Encryptor()
+            encrypted_text = encryptor.encrypt(message=self.editText.get(1.0, END), key= self.personalKey)
+            file.write(encrypted_text)
         
 
     def onCopyTextButtonClick(self) -> None:
