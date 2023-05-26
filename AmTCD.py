@@ -5,53 +5,47 @@ from tkinter import filedialog
 from tkinter.simpledialog import askinteger
 import configparser
 import os.path
-
-class Encryptor:
-    def encrypt(self, message: str, key:int) -> str:
+class Encryptor():
+    def encrypt(self, message: str, key: int) -> str:
         encrypted = ""
-        if(key > 32):
+        if (key > 32):
             key = key % 32
         for c in message:
             unicode_number = ord(c)
             if (unicode_number + key > 1114111):
-                rest = unicode_number + key - 1114111
-                unicode_number = 0 + rest
-                encrypted += chr(unicode_number)
+                encrypted += chr(unicode_number + key - 1114111)
                 continue
             encrypted += chr(unicode_number + key)
         return encrypted
+
     def decrypt(self, message: str, key: int) -> str:
         decrypted = ""
-        if(key > 32):
+        if (key > 32):
             key = key % 32
         for c in message:
             unicode_number = ord(c)
             if (unicode_number - key < 0):
-                rest = key - unicode_number
-                unicode_number = 1114111 - rest
-                decrypted += chr(unicode_number)
+                decrypted += chr(1114111 - (key - unicode_number))
                 continue
             decrypted += chr(unicode_number - key)
         return decrypted
-class Application:
+
+class Application():
     def __init__(self) -> None:
         self.currentFileDirectory = ""
         self.personalKey = None
 
-        if(os.path.exists("AmTCD.ini")):
+        if (os.path.exists("AmTCD.ini")):
             config = configparser.ConfigParser()
             config.read('AmTCD.ini')
             self.personalKey = int(config['main']['key'])
-
-        print(self.personalKey)
-        print(type(self.personalKey))
 
         self.window = Tk()
         self.window.minsize(800, 450)
         self.window.title("NoName.txtx")
         self.window.resizable(False, False)
         self.menubar = Menu(self.window)
-        
+
         self.fileMenu = Menu(self.menubar, tearoff=False)
         self.fileMenu.add_command(label="Новый", command=self.onNewFileButtonClick)
         self.fileMenu.add_command(label="Открыть", command=self.onOpenFileButtonClick)
@@ -63,22 +57,22 @@ class Application:
         self.menubar.add_cascade(label="Файл", menu=self.fileMenu)
 
         self.editingMenu = Menu(self.menubar, tearoff=False)
-        self.editingMenu.add_command(label="Копировать", command = self.onCopyTextButtonClick)
+        self.editingMenu.add_command(label="Копировать", command=self.onCopyTextButtonClick)
         self.editingMenu.add_command(label="Вставить", command=self.onInsertTextButtonClick)
         self.editingMenu.add_separator()
         self.editingMenu.add_command(label="Параметры...", command=self.onParametersButtonClick)
 
         self.menubar.add_cascade(label="Правка", menu=self.editingMenu)
-        
+
         self.infoMenu = Menu(self.menubar, tearoff=False)
         self.infoMenu.add_command(label="Содержание", command=self.onShowApplicationContentClick)
         self.infoMenu.add_separator()
-        self.infoMenu.add_command(label="О программе...", command= self.onAboutButtonClick)
+        self.infoMenu.add_command(label="О программе...", command=self.onAboutButtonClick)
 
         self.menubar.add_cascade(label="Справка", menu=self.infoMenu)
 
-        self.window.config(menu=self.menubar) 
-        
+        self.window.config(menu=self.menubar)
+
         self.editText = Text(wrap=WORD)
 
         self.scroll = Scrollbar(command=self.editText.yview())
@@ -88,76 +82,56 @@ class Application:
         self.editText.configure(yscrollcommand=self.scroll.set)
 
     def onNewFileButtonClick(self) -> None:
-        self.currentFileDirectory=""
+        self.currentFileDirectory = ""
         self.window.title("NoName.txtx")
         self.editText.delete("1.0", END)
 
     def onOpenFileButtonClick(self) -> None:
         directory = filedialog.askopenfilename(defaultextension="txtx")
-        if(not self.isDirectoryEmpty(directory)):
-            encryptor = Encryptor()
-
-            key = askinteger(title="Ключ", prompt="Введите ключ для расшифровки")
-            text = self.readFile(directory)
-
-            decrypted_text = encryptor.decrypt(message=text, key= key)
-
+        if (not self.isDirectoryEmpty(directory)):
+            key = askinteger(title="Ключ", prompt="Введите ключ для расшифровки", minvalue=1, maxvalue=999)
             self.editText.delete("1.0", END)
-            self.editText.insert("1.0", decrypted_text)
+            self.editText.insert("1.0", Encryptor().decrypt(message=self.readFile(directory), key=key))
             self.window.title(directory)
             self.currentFileDirectory = directory
         else:
             showerror(title="Ошибка", message="Неверно указан путь")
 
-
     def readFile(self, directory: str) -> str:
-        text = ""
         with open(directory, "r") as file:
-            text = file.read()
-        return text
-
+            return file.read()
 
     def isDirectoryEmpty(self, directory: str) -> bool:
         return len(directory.replace(' ', '')) == 0
 
     def onSaveFileAsButtonClick(self) -> None:
         self.currentFileDirectory = filedialog.asksaveasfilename(defaultextension="txtx")
-        if(not self.isDirectoryEmpty(self.currentFileDirectory)):
+        if (not self.isDirectoryEmpty(self.currentFileDirectory)):
             self.saveFile()
             self.window.title(self.currentFileDirectory)
             showinfo(title="Сохранение", message="Файл успешно сохранен")
         else:
             showerror(title="Ошибка", message="Неверно указан путь")
-    
+
     def onSaveFileButtonClick(self) -> None:
-        if(not self.isDirectoryEmpty(self.currentFileDirectory)):
-            self.saveFile()
-        else:
-            self.onSaveFileAsButtonClick()
+        self.saveFile() if not self.isDirectoryEmpty(self.currentFileDirectory) else self.onSaveFileAsButtonClick()
 
     def saveFile(self) -> None:
-        if(self.personalKey is None):
-            self.personalKey = askinteger(title="Ключ", prompt="Ваш ключ не установлен. Введите его", minvalue=1)
+        if (self.personalKey is None):
+            self.personalKey = askinteger(title="Ключ", prompt="Ваш ключ не установлен. Введите его", minvalue=1, maxvalue=999)
         with open(self.currentFileDirectory, "w") as file:
-            encryptor = Encryptor()
-            encrypted_text = encryptor.encrypt(message=self.editText.get(1.0, END), key= self.personalKey)
-            file.write(encrypted_text)
-        
+            file.write(str(Encryptor().encrypt(message=self.editText.get(1.0, END), key=self.personalKey)))
 
     def onCopyTextButtonClick(self) -> None:
         self.window.clipboard_clear()
         self.window.clipboard_append(self.editText.selection_get())
 
     def onInsertTextButtonClick(self) -> None:
-        clipboardValue = self.window.clipboard_get()
-        if isinstance(clipboardValue, str):
-            self.editText.insert(INSERT, clipboardValue)
-        else:
-            showerror(title="Ошибка", message="Вставить можно только текст")
+        self.editText.insert(INSERT, self.window.clipboard_get()) if isinstance(self.window.clipboard_get(), str) else showerror(title='Ошибка', message='Вставить можно только текс')
 
     def onAboutButtonClick(self) -> None:
         showinfo(title="О программе", message="Программа для 'прозрачного шифрования'\n(c) Petukhov A.O., Russia, 2023")
-    
+
     def onShowApplicationContentClick(self) -> None:
         contentWindow = Toplevel()
         contentWindow.resizable(False, False)
@@ -166,25 +140,22 @@ class Application:
 
         info = "Приложение с графическим интерфейсом\n'Блокнот TCD'(файл приложения: TCD).\n"
         info += "Позволяет: создавать/открывать/сохранять\nзашифрованный текстовый файл, предусмотрены\nввод и сохранение личного ключа,\nвывод не модальной форма 'Справка',\nвывод модальной формы 'О программе'"
-        infoLabel = ttk.Label(contentWindow, text= info)
-        infoLabel.pack(anchor=CENTER, expand=1)
-        
-        closeButton = ttk.Button(contentWindow,text="Закрыть", command= contentWindow.destroy)
-        closeButton.pack(anchor=SE)
+        infoLabel = ttk.Label(contentWindow, text=info).pack(anchor=CENTER, expand=1)
+
+        closeButton = ttk.Button(contentWindow, text="Закрыть", command=contentWindow.destroy).pack(anchor=SE, pady=10, padx=10)
+
     def onParametersButtonClick(self) -> None:
-        self.personalKey = askinteger(title="Ключ", prompt="Введите Ваш ключ:", minvalue=1)
-        self.savePreferences(self.personalKey)
+        self.savePreferences(askinteger(title="Ключ", prompt="Введите Ваш ключ", minvalue=1, maxvalue=999))
         showinfo(title='Ключ', message='Ключ сохранен')
 
     def savePreferences(self, key: int) -> None:
         config = configparser.ConfigParser()
-        config['main'] = {'key' : str(key)}
+        config['main'] = {'key': str(key)}
         with open("AmTCD.ini", 'w') as file:
             config.write(file)
 
     def showWindow(self) -> None:
         self.window.mainloop()
-
 
 app = Application()
 app.showWindow()
