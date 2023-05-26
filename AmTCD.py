@@ -98,7 +98,7 @@ class Application():
             showerror(title="Ошибка", message="Неверно указан путь")
 
     def readFile(self, directory: str) -> str:
-        with open(directory, "r") as file:
+        with open(directory, "r", encoding='utf-8') as file:
             return file.read()
 
     def isDirectoryEmpty(self, directory: str) -> bool:
@@ -119,7 +119,7 @@ class Application():
     def saveFile(self) -> None:
         if (self.personalKey is None):
             self.personalKey = askinteger(title="Ключ", prompt="Ваш ключ не установлен. Введите его", minvalue=1, maxvalue=999)
-        with open(self.currentFileDirectory, "w") as file:
+        with open(self.currentFileDirectory, "w", encoding='utf-8') as file:
             file.write(str(Encryptor().encrypt(message=self.editText.get(1.0, END), key=self.personalKey)))
 
     def onCopyTextButtonClick(self) -> None:
